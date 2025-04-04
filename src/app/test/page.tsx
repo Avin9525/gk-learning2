@@ -41,46 +41,8 @@ export default function TestPage() {
   const [includeNewQuestions, setIncludeNewQuestions] = useState(true);
   const [showConfig, setShowConfig] = useState(true);
   
-  // Store randomized options for each question
-  const [randomizedOptions, setRandomizedOptions] = useState<{[key: string]: {options: string[], correctIndex: number}}>({});
-  
   // Mock user ID (in a real app, this would come from authentication)
   const userId = 'user123';
-
-  // Function to randomize options for a question
-  const randomizeOptions = (question: Question) => {
-    if (randomizedOptions[question.$id]) {
-      return randomizedOptions[question.$id];
-    }
-    
-    // Create array of indices
-    const indices = Array.from({length: question.options.length}, (_, i) => i);
-    
-    // Shuffle indices
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [indices[i], indices[j]] = [indices[j], indices[i]];
-    }
-    
-    // Create new options array with shuffled order
-    const shuffledOptions = indices.map(i => question.options[i]);
-    
-    // Find the new index of the correct answer
-    const correctIndex = indices.indexOf(question.correctAnswer);
-    
-    // Store the randomized options
-    const result = {
-      options: shuffledOptions,
-      correctIndex: correctIndex
-    };
-    
-    setRandomizedOptions(prev => ({
-      ...prev,
-      [question.$id]: result
-    }));
-    
-    return result;
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,24 +107,6 @@ export default function TestPage() {
       setShowExplanation(false);
       setTestComplete(false);
       setShowConfig(false);
-      
-      // Initialize randomized options for all questions
-      const initialRandomizedOptions: {[key: string]: {options: string[], correctIndex: number}} = {};
-      shuffledQuestions.forEach(question => {
-        const indices = Array.from({length: question.options.length}, (_, i) => i);
-        for (let i = indices.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [indices[i], indices[j]] = [indices[j], indices[i]];
-        }
-        const shuffledOptions = indices.map(i => question.options[i]);
-        const correctIndex = indices.indexOf(question.correctAnswer);
-        initialRandomizedOptions[question.$id] = {
-          options: shuffledOptions,
-          correctIndex: correctIndex
-        };
-      });
-      setRandomizedOptions(initialRandomizedOptions);
-      
       setLoading(false);
     } catch (error) {
       console.error('Error starting test:', error);
@@ -175,8 +119,7 @@ export default function TestPage() {
     if (selectedAnswer !== null) return; // Prevent multiple selections
     
     setSelectedAnswer(answerIndex);
-    const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = answerIndex === randomizedOptions[currentQuestion.$id].correctIndex;
+    const isCorrect = answerIndex === questions[currentQuestionIndex].correctAnswer;
     
     // Update test results
     setTestResults(prev => ({
@@ -192,7 +135,7 @@ export default function TestPage() {
     
     // Update progress
     try {
-      const questionId = currentQuestion.$id;
+      const questionId = questions[currentQuestionIndex].$id;
       const progressResponse = await getProgressByQuestionId(userId, questionId);
       
       if (progressResponse.documents.length > 0) {
@@ -424,7 +367,6 @@ export default function TestPage() {
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  const currentRandomizedOptions = currentQuestion ? randomizedOptions[currentQuestion.$id] : null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -446,7 +388,7 @@ export default function TestPage() {
             </div>
             
             <div className="space-y-3">
-              {currentRandomizedOptions && currentRandomizedOptions.options.map((option, index) => (
+              {currentQuestion.options.map((option, index) => (
                 <button
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
@@ -455,10 +397,10 @@ export default function TestPage() {
                     selectedAnswer === null
                       ? 'border-gray-200 hover:border-gray-300 text-gray-900'
                       : selectedAnswer === index
-                      ? index === currentRandomizedOptions.correctIndex
+                      ? index === currentQuestion.correctAnswer
                         ? 'border-green-500 bg-green-50 text-green-900'
                         : 'border-red-500 bg-red-50 text-red-900'
-                      : index === currentRandomizedOptions.correctIndex && selectedAnswer !== null
+                      : index === currentQuestion.correctAnswer && selectedAnswer !== null
                       ? 'border-green-500 bg-green-50 text-green-900'
                       : 'border-gray-200 text-gray-900'
                   }`}
