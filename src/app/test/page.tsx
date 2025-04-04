@@ -149,6 +149,7 @@ export default function TestPage() {
           totalAttempts: progress.totalAttempts + 1,
           lastAnswerCorrect: isCorrect,
           streakCount: isCorrect ? progress.streakCount + 1 : 0,
+          masteryLevel: 0 // Initialize with default value
         };
         
         // Calculate new mastery level
