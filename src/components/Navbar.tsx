@@ -52,6 +52,16 @@ export default function Navbar() {
                                 Bulk Import
                             </Link>
                             <Link
+                                href="/bulk-import-json"
+                                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                                    isActive('/bulk-import-json')
+                                        ? 'border-gray-900 text-gray-900'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                JSON Import
+                            </Link>
+                            <Link
                                 href="/bulk-import-2"
                                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                                     isActive('/bulk-import-2')
@@ -70,6 +80,16 @@ export default function Navbar() {
                                 }`}
                             >
                                 Take Test
+                            </Link>
+                            <Link
+                                href="/manage-questions"
+                                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                                    isActive('/manage-questions')
+                                        ? 'border-gray-900 text-gray-900'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Manage Questions
                             </Link>
                         </div>
                     </div>
@@ -110,6 +130,16 @@ export default function Navbar() {
                         Bulk Import
                     </Link>
                     <Link
+                        href="/bulk-import-json"
+                        className={`block px-3 py-2 rounded-md text-base font-medium ${
+                            isActive('/bulk-import-json')
+                                ? 'bg-gray-100 text-gray-900'
+                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                        }`}
+                    >
+                        JSON Import
+                    </Link>
+                    <Link
                         href="/bulk-import-2"
                         className={`block px-3 py-2 rounded-md text-base font-medium ${
                             isActive('/bulk-import-2')
@@ -128,6 +158,16 @@ export default function Navbar() {
                         }`}
                     >
                         Take Test
+                    </Link>
+                    <Link
+                        href="/manage-questions"
+                        className={`block px-3 py-2 rounded-md text-base font-medium ${
+                            isActive('/manage-questions')
+                                ? 'bg-gray-100 text-gray-900'
+                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                        }`}
+                    >
+                        Manage Questions
                     </Link>
                 </div>
             </div>

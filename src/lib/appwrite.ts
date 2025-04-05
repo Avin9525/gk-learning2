@@ -46,14 +46,19 @@ export const getQuestionsByTags = async (tags: string[]) => {
 };
 
 export const getQuestionsBySubjectAndTags = async (subject: string, tags: string[]) => {
-    return databases.listDocuments(
-        DATABASE_ID,
-        COLLECTIONS.QUESTIONS,
-        [
-            Query.equal('subject', subject),
-            Query.search('tags', tags.join(' '))
-        ]
-    );
+    try {
+        return await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTIONS.QUESTIONS,
+            [
+                Query.equal('subject', subject),
+                Query.search('tags', tags.join(' '))
+            ]
+        );
+    } catch (error) {
+        console.error('Error getting questions by subject and tags:', error);
+        throw error;
+    }
 };
 
 export const createProgress = async (progressData: Omit<Progress, '$id' | '$collectionId' | '$databaseId' | '$createdAt' | '$updatedAt' | '$permissions'>) => {
@@ -262,4 +267,34 @@ export const calculateMasteryLevel = (progress: Progress): number => {
     const masteryLevel = Math.min(100, Math.floor(correctRatio * 100) + streakBonus);
     
     return masteryLevel;
+};
+
+export const deleteQuestion = async (questionId: string) => {
+    try {
+        // First, get all progress records for this question
+        const progressResponse = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTIONS.PROGRESS,
+            [Query.equal('questionId', questionId)]
+        );
+
+        // Delete all progress records for this question
+        for (const progress of progressResponse.documents) {
+            await databases.deleteDocument(
+                DATABASE_ID,
+                COLLECTIONS.PROGRESS,
+                progress.$id
+            );
+        }
+
+        // Finally, delete the question
+        await databases.deleteDocument(
+            DATABASE_ID,
+            COLLECTIONS.QUESTIONS,
+            questionId
+        );
+    } catch (error) {
+        console.error('Error deleting question and progress:', error);
+        throw error;
+    }
 }; 
