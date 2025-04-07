@@ -30,21 +30,24 @@ export default function ManageQuestionsPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      
+      // Fetch questions
       const questionsResponse = await getQuestions();
-      
-      // Extract unique subjects and tags
-      const subjects = [...new Set(questionsResponse.documents.map((q: any) => q.subject).filter(Boolean))] as string[];
-      setAvailableSubjects(subjects);
-      
-      const allTags = questionsResponse.documents.flatMap((q: any) => q.tags || []);
-      const uniqueTags = [...new Set(allTags)] as string[];
-      setAvailableTags(uniqueTags);
-      
       setQuestions(questionsResponse.documents as Question[]);
+      
+      // Fetch subjects and tags from the API
+      const response = await fetch('/api/subjects-and-tags');
+      if (!response.ok) {
+        throw new Error('Failed to fetch subjects and tags');
+      }
+      const data = await response.json();
+      setAvailableSubjects(data.subjects || []);
+      setAvailableTags(data.tags || []);
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError('Failed to load questions. Please try again later.');
+      setError('Failed to load questions and tags. Please try again later.');
       setLoading(false);
     }
   };

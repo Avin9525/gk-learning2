@@ -48,6 +48,7 @@ export default function BulkImportJsonPage() {
     // Fetch available subjects and tags
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await fetch('/api/subjects-and-tags');
         if (!response.ok) {
           throw new Error('Failed to fetch subjects and tags');
@@ -55,9 +56,11 @@ export default function BulkImportJsonPage() {
         const data = await response.json();
         setAvailableSubjects(data.subjects || []);
         setAvailableTags(data.tags || []);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching subjects and tags:', error);
         setError('Failed to load available subjects and tags. Please try again later.');
+        setLoading(false);
       }
     };
     

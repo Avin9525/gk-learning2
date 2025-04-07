@@ -28,24 +28,32 @@ export default function BulkImportPage() {
     valid: 0,
     invalid: 0,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchData = async () => {
       try {
-        const questions = await getQuestions();
-        // Extract unique subjects
-        const subjects = [...new Set(questions.documents.map((q) => (q as Question).subject).filter(Boolean))] as string[];
-        setAvailableSubjects(subjects);
+        setLoading(true);
         
-        // Extract unique tags
-        const tags = [...new Set(questions.documents.flatMap((q) => (q as Question).tags))] as string[];
-        setAvailableTags(tags);
+        // Fetch subjects and tags from the API
+        const response = await fetch('/api/subjects-and-tags');
+        if (!response.ok) {
+          throw new Error('Failed to fetch subjects and tags');
+        }
+        const data = await response.json();
+        setAvailableSubjects(data.subjects || []);
+        setAvailableTags(data.tags || []);
+        
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching questions:', error);
+        console.error('Error fetching data:', error);
+        setError('Failed to load available subjects and tags. Please try again later.');
+        setLoading(false);
       }
     };
 
-    fetchQuestions();
+    fetchData();
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

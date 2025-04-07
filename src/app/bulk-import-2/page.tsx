@@ -21,22 +21,22 @@ export default function BulkImport2Page() {
   });
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchData = async () => {
       try {
-        const questions = await getQuestions();
-        // Extract unique subjects
-        const subjects = [...new Set(questions.documents.map((q) => (q as Question).subject).filter(Boolean))] as string[];
-        setAvailableSubjects(subjects);
-        
-        // Extract unique tags
-        const tags = [...new Set(questions.documents.flatMap((q) => (q as Question).tags))] as string[];
-        setAvailableTags(tags);
+        // Fetch subjects and tags from the API
+        const response = await fetch('/api/subjects-and-tags');
+        if (!response.ok) {
+          throw new Error('Failed to fetch subjects and tags');
+        }
+        const data = await response.json();
+        setAvailableSubjects(data.subjects || []);
+        setAvailableTags(data.tags || []);
       } catch (error) {
-        console.error('Error fetching questions:', error);
+        console.error('Error fetching subjects and tags:', error);
       }
     };
 
-    fetchQuestions();
+    fetchData();
   }, []);
 
   const parseQuestions = () => {
