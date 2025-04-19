@@ -30,31 +30,92 @@ export const getQuestions = async () => {
 };
 
 export const getQuestionsBySubject = async (subject: string) => {
-    return databases.listDocuments(
-        DATABASE_ID,
-        COLLECTIONS.QUESTIONS,
-        [Query.equal('subject', subject)]
-    );
-};
+    const allQuestions: any[] = [];
+    let offset = 0;
+    const limit = 100;
+    let hasMore = true;
 
-export const getQuestionsByTags = async (tags: string[]) => {
-    return databases.listDocuments(
-        DATABASE_ID,
-        COLLECTIONS.QUESTIONS,
-        [Query.search('tags', tags.join(' '))]
-    );
-};
-
-export const getQuestionsBySubjectAndTags = async (subject: string, tags: string[]) => {
-    try {
-        return await databases.listDocuments(
+    while (hasMore) {
+        const response = await databases.listDocuments(
             DATABASE_ID,
             COLLECTIONS.QUESTIONS,
             [
                 Query.equal('subject', subject),
-                Query.search('tags', tags.join(' '))
+                Query.limit(limit),
+                Query.offset(offset)
             ]
         );
+
+        allQuestions.push(...response.documents);
+
+        if (response.documents.length < limit) {
+            hasMore = false;
+        } else {
+            offset += limit;
+        }
+    }
+
+    return { documents: allQuestions };
+};
+
+export const getQuestionsByTags = async (tags: string[]) => {
+    const allQuestions: any[] = [];
+    let offset = 0;
+    const limit = 100;
+    let hasMore = true;
+
+    while (hasMore) {
+        const response = await databases.listDocuments(
+            DATABASE_ID,
+            COLLECTIONS.QUESTIONS,
+            [
+                Query.search('tags', tags.join(' ')),
+                Query.limit(limit),
+                Query.offset(offset)
+            ]
+        );
+
+        allQuestions.push(...response.documents);
+
+        if (response.documents.length < limit) {
+            hasMore = false;
+        } else {
+            offset += limit;
+        }
+    }
+
+    return { documents: allQuestions };
+};
+
+export const getQuestionsBySubjectAndTags = async (subject: string, tags: string[]) => {
+    try {
+        const allQuestions: any[] = [];
+        let offset = 0;
+        const limit = 100;
+        let hasMore = true;
+
+        while (hasMore) {
+            const response = await databases.listDocuments(
+                DATABASE_ID,
+                COLLECTIONS.QUESTIONS,
+                [
+                    Query.equal('subject', subject),
+                    Query.search('tags', tags.join(' ')),
+                    Query.limit(limit),
+                    Query.offset(offset)
+                ]
+            );
+
+            allQuestions.push(...response.documents);
+
+            if (response.documents.length < limit) {
+                hasMore = false;
+            } else {
+                offset += limit;
+            }
+        }
+
+        return { documents: allQuestions };
     } catch (error) {
         console.error('Error getting questions by subject and tags:', error);
         throw error;
